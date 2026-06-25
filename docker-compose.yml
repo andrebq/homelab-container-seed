@@ -1,0 +1,18 @@
+services:
+  seeder:
+    build: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - seed_config:/seed_config
+    environment:
+      # Comma-separated absolute paths to search for image definitions.
+      # /seed_config is always available via the seed_config volume.
+      - SEEDER_DIRECTORIES=${SEEDER_DIRECTORIES:-/seed_config}
+      # Optional: limits discovery to global/ + this instance's subfolder
+      - SEEDER_INSTANCE_NAME=${SEEDER_INSTANCE_NAME:-}
+      # If seed_config volume is empty, this repo is cloned into it at startup
+      - SEED_CONFIG_REPO=${SEED_CONFIG_REPO:-}
+    restart: "no"
+
+volumes:
+  seed_config:
