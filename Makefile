@@ -31,4 +31,4 @@ test-docker: build
 test: test-local test-docker
 
 clean:
-	-docker rmi $(IMAGE) $(TEST_IMAGES)
+	docker rmi $(IMAGE) $(TEST_IMAGES)

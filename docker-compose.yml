@@ -1,18 +1,24 @@
 services:
   seeder:
-    build: .
+    image: ghcr.io/andrebq/homelab-container-seed:latest
     volumes:
+      # Gives the seeder access to the host Docker daemon
       - /var/run/docker.sock:/var/run/docker.sock
+      # Persists the seed config between runs
       - seed_config:/seed_config
     environment:
-      # Comma-separated absolute paths to search for image definitions.
-      # /seed_config is always available via the seed_config volume.
-      - SEEDER_DIRECTORIES=${SEEDER_DIRECTORIES:-/seed_config}
-      # Optional: limits discovery to global/ + this instance's subfolder
+      # Comma-separated absolute paths that contain image definitions.
+      # The seed_config volume is mounted at /seed_config and is a good default.
+      - SEEDER_DIRECTORIES=${SEEDER_DIRECTORIES:-/seed_config/seeds}
+      # Optional: also searches <dir>/<SEEDER_INSTANCE_NAME>/ in addition to <dir>/global/
       - SEEDER_INSTANCE_NAME=${SEEDER_INSTANCE_NAME:-}
-      # If seed_config volume is empty, this repo is cloned into it at startup
+      # If the seed_config volume is empty on first run, this repo is cloned into it
       - SEED_CONFIG_REPO=${SEED_CONFIG_REPO:-}
     restart: "no"
+    # Uncomment the line below to keep the container alive for inspection
+    # (e.g. to exec in and debug before the seeder has run successfully).
+    # Remove it for normal use — the seeder exits once all seeds are planted.
+    # command: ["tail", "-f", "/dev/null"]
 
 volumes:
   seed_config:

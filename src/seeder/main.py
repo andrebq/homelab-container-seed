@@ -13,15 +13,37 @@ def setup_seed_config(config_path: Path) -> None:
     if not repo_url:
         return
 
-    if config_path.exists() and any(config_path.iterdir()):
-        print(f"[seed-config] {config_path} already populated, skipping clone")
+    seeds_path = config_path / "seeds"
+    if seeds_path.exists() and any(seeds_path.iterdir()):
+        print(f"[seed-config] {seeds_path} already populated, skipping clone")
         return
 
-    print(f"[seed-config] Cloning {repo_url} into {config_path}")
-    config_path.mkdir(parents=True, exist_ok=True)
-    result = subprocess.run(["git", "clone", repo_url, str(config_path)])
+    print(f"[seed-config] Cloning {repo_url} into {seeds_path}")
+    seeds_path.mkdir(parents=True, exist_ok=True)
+    result = subprocess.run(["git", "clone", repo_url, str(seeds_path)])
     if result.returncode != 0:
         print(f"[seed-config] ERROR: git clone failed (exit {result.returncode})")
+        sys.exit(1)
+
+
+def setup_age_key(config_path: Path) -> None:
+    key_file = config_path / ".age" / "key"
+    if key_file.exists():
+        print("[age] Public key:")
+        # age-keygen -y prints the public key for an existing private key file
+        result = subprocess.run(["age-keygen", "-y", str(key_file)])
+        if result.returncode != 0:
+            print(f"[age] ERROR: could not read public key (exit {result.returncode})")
+            sys.exit(1)
+        return
+
+    key_file.parent.mkdir(parents=True, exist_ok=True)
+    print("[age] Generating new age key pair...")
+    print("[age] Public key:")
+    # age-keygen -o <file> writes the private key to the file and prints the public key to stdout
+    result = subprocess.run(["age-keygen", "-o", str(key_file)])
+    if result.returncode != 0:
+        print(f"[age] ERROR: age-keygen failed (exit {result.returncode})")
         sys.exit(1)
 
 
@@ -72,6 +94,7 @@ def main() -> None:
     seed_config_path = Path(get_env("SEED_CONFIG_PATH", "/seed_config"))
 
     setup_seed_config(seed_config_path)
+    setup_age_key(seed_config_path)
 
     raw_dirs = get_env("SEEDER_DIRECTORIES")
     if not raw_dirs:
