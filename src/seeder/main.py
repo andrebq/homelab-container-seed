@@ -14,8 +14,15 @@ def setup_seed_config(config_path: Path) -> None:
         return
 
     seeds_path = config_path / "seeds"
+    if seeds_path.exists() and (seeds_path / ".git").exists():
+        print(f"[seed-config] Updating {seeds_path} via git pull", flush=True)
+        result = subprocess.run(["git", "pull"], cwd=seeds_path)
+        if result.returncode != 0:
+            print(f"[seed-config] WARNING: git pull failed (exit {result.returncode}), local modifications may be present")
+        return
+
     if seeds_path.exists() and any(seeds_path.iterdir()):
-        print(f"[seed-config] {seeds_path} already populated, skipping clone")
+        print(f"[seed-config] {seeds_path} already populated but is not a git repo, skipping clone")
         return
 
     print(f"[seed-config] Cloning {repo_url} into {seeds_path}", flush=True)
