@@ -90,7 +90,7 @@ def run_plant_seed(image_name: str, image_dir: Path, instance_name: str) -> bool
     env = os.environ.copy()
     env["SEED_INSTANCE_NAME"] = instance_name
     env["IMAGE_NAME"] = image_name
-    result = subprocess.run([sys.executable, str(script)], cwd=image_dir, env=env)
+    result = subprocess.run(["uv", "run", "--script", str(script)], cwd=image_dir, env=env)
     if result.returncode != 0:
         print(f"[plant] ERROR: plant_seed.py failed for {image_name} (exit {result.returncode})")
         return False
