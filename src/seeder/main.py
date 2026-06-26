@@ -80,6 +80,7 @@ def build_image(image_name: str, image_dir: Path) -> bool:
     if result.returncode != 0:
         print(f"[build] ERROR: docker build failed for {image_name} (exit {result.returncode})")
         return False
+    print(f"[build] {image_name}:latest built successfully")
     return True
 
 
@@ -93,6 +94,7 @@ def run_plant_seed(image_name: str, image_dir: Path, instance_name: str) -> bool
     if result.returncode != 0:
         print(f"[plant] ERROR: plant_seed.py failed for {image_name} (exit {result.returncode})")
         return False
+    print(f"[plant] {image_name} seed planted successfully")
     return True
 
 
