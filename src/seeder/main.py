@@ -18,7 +18,7 @@ def setup_seed_config(config_path: Path) -> None:
         print(f"[seed-config] {seeds_path} already populated, skipping clone")
         return
 
-    print(f"[seed-config] Cloning {repo_url} into {seeds_path}")
+    print(f"[seed-config] Cloning {repo_url} into {seeds_path}", flush=True)
     seeds_path.mkdir(parents=True, exist_ok=True)
     result = subprocess.run(["git", "clone", repo_url, str(seeds_path)])
     if result.returncode != 0:
@@ -29,7 +29,7 @@ def setup_seed_config(config_path: Path) -> None:
 def setup_age_key(config_path: Path) -> None:
     key_file = config_path / ".age" / "key"
     if key_file.exists():
-        print("[age] Public key:")
+        print("[age] Public key:", flush=True)
         # age-keygen -y prints the public key for an existing private key file
         result = subprocess.run(["age-keygen", "-y", str(key_file)])
         if result.returncode != 0:
@@ -39,7 +39,7 @@ def setup_age_key(config_path: Path) -> None:
 
     key_file.parent.mkdir(parents=True, exist_ok=True)
     print("[age] Generating new age key pair...")
-    print("[age] Public key:")
+    print("[age] Public key:", flush=True)
     # age-keygen -o <file> writes the private key to the file and prints the public key to stdout
     result = subprocess.run(["age-keygen", "-o", str(key_file)])
     if result.returncode != 0:
@@ -65,7 +65,7 @@ def find_image_dirs(seed_dir: Path, instance_name: str) -> list[tuple[str, Path]
 
 
 def build_image(image_name: str, image_dir: Path) -> bool:
-    print(f"[build] {image_name}:latest  ({image_dir})")
+    print(f"[build] {image_name}:latest  ({image_dir})", flush=True)
     result = subprocess.run(
         ["docker", "build", "-t", f"{image_name}:latest", "."],
         cwd=image_dir,
@@ -78,7 +78,7 @@ def build_image(image_name: str, image_dir: Path) -> bool:
 
 def run_plant_seed(image_name: str, image_dir: Path, instance_name: str) -> bool:
     script = image_dir / "plant_seed.py"
-    print(f"[plant] {image_name}  ({script})")
+    print(f"[plant] {image_name}  ({script})", flush=True)
     env = os.environ.copy()
     env["SEED_INSTANCE_NAME"] = instance_name
     env["IMAGE_NAME"] = image_name
